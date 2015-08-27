@@ -1,0 +1,16 @@
+ <?php
+
+class CSearch extends CBlog {
+
+    public function __construct($database) {
+        parent::__construct($database);
+    }
+
+    public function searchBlogs($search){ 
+      $sql = "SELECT * FROM Content WHERE DATA LIKE '%$search%' OR title LIKE '%$search%'; ";
+      $res = $this->db->ExecuteSelectQueryAndFetchAll($sql);
+      $this->db->SaveDebug("Det fanns " . $this->db->RowCount() . " rader från databasen.");  
+      return $res;
+    }
+
+}
