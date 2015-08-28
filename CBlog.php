@@ -7,16 +7,15 @@ class CBlog extends CContent {
     }
 
 
-
-    public function getPosts() {
-        
+ /**
+   * 
+   *
+   * getPosts hämtar alla inlägg i databasen. 
+   *
+   */
+    public function getPosts() {        
         $this->slug = isset($_GET['slug']) ? $_GET['slug'] : null;
-        #$this->search  = isset($_GET['search'])  ? $_GET['search']  : null;
-        // Get content
-        #$slugSql = $this->slug ? 'slug = ?' : '1';
-        // Get content
         $slugSql = $this->slug ? 'slug = ?' : '1';
-        #$searchSql = $this->search ? 'search = ?' : '1';
         $sql = "
             SELECT *
             FROM Content
@@ -35,17 +34,26 @@ class CBlog extends CContent {
 
 
 
-
+ /**
+   * Sanitize content before using it.
+   *
+   * @param $c Den data som ska visas går igon och valideras för att 
+   *        kontrollera htmlEntities och liknande skadlig kod.
+   */
     public function sanitizeVariables($c) {
         parent::sanitizeVariables($c);
         $filter = new CTextFilter(); 
-           // Sanitize content before using it.
         $this->title  = htmlentities($c->title, null, 'UTF-8');
         $this->data   = $filter->doFilter(htmlentities($c->DATA, null, 'UTF-8'), $c->FILTER);
     }
 
 
-
+ /**
+   * viewsCount uppdaterar antalet views på varje table row som varje unik post har. 
+   *
+   * @param id på den table row som ska visas i bloggen
+   *        
+   */
     public function viewsCount($c){
         $sample_rate = 1;
         $sql = "UPDATE Content SET views = views + $sample_rate WHERE id = '$c' ";
@@ -53,6 +61,13 @@ class CBlog extends CContent {
         return $res; 
      }
 
+
+ /** Visar den data som söks efter
+   * 
+   *c
+   * @param $c, väljer ut data från db via id:et
+   *         
+   */
     public function renderSearchHTML($c) {
         $html ="<tr class='table table-list-search'>
                 <td><a href='blog.php?slug={$this->slug}'>{$this->title}</a></td>
@@ -65,7 +80,12 @@ class CBlog extends CContent {
     }
 
 
-
+ /**
+   * Render all blogs 
+   *
+   * @param 
+   *         
+   */
     public function renderHTML($c) {
         $this->viewsCount($c->id);
         $this->sanitizeVariables($c); 
@@ -107,13 +127,24 @@ class CBlog extends CContent {
         return $html;
     }
 
-public function first_sentence($content) {
-    $pos = strpos($content, '.');
-    return substr($content, 0, $pos+1);
-}
+ /**
+   * Show first sentence of the blog content
+   *
+   * @param whole blog data, strips down to first sentence
+   *         
+   */
+    public function first_sentence($content) {
+        $pos = strpos($content, '.');
+        return substr($content, 0, $pos+1);
+    }
 
-public function renderBlogs($c) {
-
+ /**
+   * Get Blogs 
+   *
+   * @param 
+   *         
+   */
+    public function renderBlogs($c) {
         $this->sanitizeVariables($c); 
         $html ="
         <div class='container'>
@@ -121,14 +152,12 @@ public function renderBlogs($c) {
                 <div class='panel-heading'>
                     <!-- Title -->
                     <h2><a href='blog.php?slug={$this->slug}'>{$this->title}</a></h2>
-
                     <div style='padding-top:30px' class='panel-body'>
-
                     <div class='breadcrumb'>
-                    <p>
-                        {$this->first_sentence($this->data)}..
-                        <a href='blog.php?slug={$this->slug}'> <b>Read more..</b> </a>
-                    </div>
+                        <p>
+                            {$this->first_sentence($this->data)}..
+                            <a href='blog.php?slug={$this->slug}'> <b>Read more..</b> </a>
+                        </p>
                         <p> 
                             {$this->getCategories($c->id)}
                             <br>
@@ -143,10 +172,16 @@ public function renderBlogs($c) {
         return $html;
     }
         
- public function renderInsertForm($output) {
+   
+     /**
+    * Get insert form 
+    *
+    * @param 
+    *         
+    */
+    public function renderInsertForm($output) {
         $html = null;
         $html .= "<form method='POST' enctype='multipart/form-data' >";
-       # $html .= "<input type='hidden' name='id' value='{$this->id}'/>";
 
         $html .= "<div class='form-group float-label-control'>
                         <label for=''>Title</label>
@@ -177,67 +212,84 @@ public function renderBlogs($c) {
                         <label for=''>Filter</label>
                         <input type='text' class='form-control' name='filter' value='bbcode, nl2br, link' placeholder='Filter'>
                     </div>";
-    $html .="<div class='container text-center'>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='1'>Bootstrap</label>  <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='4'>MySQL</label>               <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='7'>MVC</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='2'>C#</label>         <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='5'>Android</label>             <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='8'>OOP</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='3'>PHP</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='6'>Gamification</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='9'>Other</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='10'>News</label>      <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='11'>IT</label>                 <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='12'>AJAX</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='13'>JavaScript</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='14'>HTML</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='15'>CSS</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='16'>BootSnipp</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='17'>Tutorials</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='18'>Worth Remembering</label>";
-    $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='19'>Studies</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='20'>Science</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='21'>DATA</label>";
-    $html .="<hr>";
-    $html .= $this->categories();
-    $html .="</div>";
 
-    $html .= "<p class=buttons><input type='submit' name='save' value='Skapa'/></p>";
-    $html .= "<p><a href='blog.php'>Visa alla</a></p>";
-    $html .= "<output>{$output}</output>";
+        $html .="<div class='container text-center'>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='1'>Bootstrap</label>  <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='4'>MySQL</label>               <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='7'>MVC</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='2'>C#</label>         <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='5'>Android</label>             <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='8'>OOP</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='3'>PHP</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='6'>Gamification</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='9'>Other</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='10'>News</label>      <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='11'>IT</label>                 <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='12'>AJAX</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='13'>JavaScript</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='14'>HTML</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='15'>CSS</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='16'>BootSnipp</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='17'>Tutorials</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='18'>Worth Remembering</label>";
+        $html .="<label class='checkbox-inline'><input type='checkbox' name='categories[]' value='19'>Studies</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='20'>Science</label>        <label class='checkbox-inline'><input type='checkbox' name='categories[]' value='21'>DATA</label>";
+        $html .="<hr>";
+        $html .= $this->categories();
+        $html .="</div>";
 
-    $html .= "</form>";
-    return $html;
+        $html .= "<p class=buttons><input type='submit' name='save' value='Skapa'/></p>";
+        $html .= "<p><a href='blog.php'>Visa alla</a></p>";
+        $html .= "<output>{$output}</output>";
+
+        $html .= "</form>";
+        return $html;
     }
 
-public function getCategories($c){
-    $html = null;
-    $sql = "SELECT name FROM Categories 
-            INNER JOIN Content2Categories
-            ON Categories.id = Content2Categories.idCategories
-            inner join Content
-            ON Content.id = Content2Categories.idContent
-            where Content.id = ? ";
+ /**
+   * Get Categories 
+   *
+   * @param
+   *         
+   */
+    public function getCategories($c){
+        $html = null;
+        $sql = "SELECT name FROM Categories 
+                INNER JOIN Content2Categories
+                ON Categories.id = Content2Categories.idCategories
+                inner join Content
+                ON Content.id = Content2Categories.idContent
+                where Content.id = ? ";
 
-    $res = $this->db->ExecuteSelectQueryAndFetchAll($sql, array($c));
-    #echo "$sql";
-    foreach ($res as $value) {
-        $html .= "<a href='blog-genre.php?name={$value->name}'><span class='label label-info'> {$value->name}</span></a> ";
+        $res = $this->db->ExecuteSelectQueryAndFetchAll($sql, array($c));
+        #echo "$sql";
+        foreach ($res as $value) {
+            $html .= "<a href='blog-genre.php?name={$value->name}'><span class='label label-info'> {$value->name}</span></a> ";
+        }
+        return $html; 
     }
-    return $html; 
-}
 
-public function categories(){
-    $html = null;
-    $sql = "SELECT name, count(Categories.id) AS antal
-            FROM Categories
-            INNER JOIN Content2Categories
-            ON Categories.id = Content2Categories.idCategories
-            inner join Content
-            ON Content.id = Content2Categories.idContent
-            group by Categories.name";
+ /**
+   * Get Categories 
+   *
+   * @param
+   *         
+   */
+    public function categories(){
+        $html = null;
+        $sql = "SELECT name, count(Categories.id) AS antal
+                FROM Categories
+                INNER JOIN Content2Categories
+                ON Categories.id = Content2Categories.idCategories
+                inner join Content
+                ON Content.id = Content2Categories.idContent
+                group by Categories.name";
 
-    $res = $this->db->ExecuteSelectQueryAndFetchAll($sql);
-    #echo "$sql";
-    foreach ($res as $value) {
-        $html .= "<a href='blog-genre.php?name={$value->name}'><span class='label label-info'> {$value->name} ({$value->antal})</span></a> ";
+        $res = $this->db->ExecuteSelectQueryAndFetchAll($sql);
+        #echo "$sql";
+        foreach ($res as $value) {
+            $html .= "<a href='blog-genre.php?name={$value->name}'><span class='label label-info'> {$value->name} ({$value->antal})</span></a> ";
+        }
+        return $html; 
     }
-    return $html; 
-}
 
+
+ /**
+   * Get Categories 
+   *
+   * @param $name id of categories to show
+   *         
+   */
     public function getCategorie($name) {
         $this->slug = isset($_GET['slug']) ? $_GET['slug'] : null;
-        // Get content
         $id = $this->getGenreId($name);
-        #$slugSql = $this->slug ? 'slug = ?' : '1';
-        // Get content
         $slugSql = $this->slug ? 'slug = ?' : '1';
         $sql = "
             SELECT *
