@@ -6,11 +6,24 @@ class CBlog extends CContent {
         parent::__construct($database);
     }
 
-
  /**
-   * 
+   * Sanitize content before using it.
    *
-   * getPosts hämtar alla inlägg i databasen. 
+   * @param $c Den data som ska visas går igon och valideras för att 
+   *        kontrollera htmlEntities och liknande skadlig kod.
+   */
+    public function sanitizeVariables($c) {
+        parent::sanitizeVariables($c);
+        $filter = new CTextFilter(); 
+        $this->title  = htmlentities($c->title, null, 'UTF-8');
+        $this->data   = $filter->doFilter(htmlentities($c->DATA, null, 'UTF-8'), $c->FILTER);
+    }
+    
+    
+ /**
+   * getPosts hämtar alla inlägg i databasen.
+   *
+   * @param 
    *
    */
     public function getPosts() {        
@@ -33,21 +46,6 @@ class CBlog extends CContent {
     }
 
 
-
- /**
-   * Sanitize content before using it.
-   *
-   * @param $c Den data som ska visas går igon och valideras för att 
-   *        kontrollera htmlEntities och liknande skadlig kod.
-   */
-    public function sanitizeVariables($c) {
-        parent::sanitizeVariables($c);
-        $filter = new CTextFilter(); 
-        $this->title  = htmlentities($c->title, null, 'UTF-8');
-        $this->data   = $filter->doFilter(htmlentities($c->DATA, null, 'UTF-8'), $c->FILTER);
-    }
-
-
  /**
    * viewsCount uppdaterar antalet views på varje table row som varje unik post har. 
    *
@@ -64,7 +62,7 @@ class CBlog extends CContent {
 
  /** Visar den data som söks efter
    * 
-   *c
+   *
    * @param $c, väljer ut data från db via id:et
    *         
    */
@@ -83,7 +81,7 @@ class CBlog extends CContent {
  /**
    * Render all blogs 
    *
-   * @param 
+   * @param id av content
    *         
    */
     public function renderHTML($c) {
