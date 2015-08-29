@@ -60,8 +60,8 @@ class CBlog extends CContent {
      }
 
 
- /** Visar den data som söks efter
-   * 
+ /** 
+   * get data 
    *
    * @param $c, väljer ut data från db via id:et
    *         
